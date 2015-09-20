@@ -15,6 +15,6 @@
 license("Apache License v2.0")
 native("jvm") module net.biver.couchdb "1.0.0" {
 	import ceylon.json "1.1.1";
-	native("jvm") import ceylon.net "1.1.1";
+	shared native("jvm") import ceylon.net "1.1.1";
 }
 

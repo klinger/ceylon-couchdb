@@ -172,6 +172,56 @@ shared class CouchDB(String url) {
 		return makeRequest(url + databaseName + "/" + documentID, put, [200, 201], jsonDocument);
 	}
 	
+	"Tries to download from jsonDocumentURI a JSON Document. Request Header has User-Agent useragent. 
+	 + Return value (success): JSONString
+	 + Return value (failed) : 'ERROR'"
+	String downloadFromWebservice(Uri jsonDocumentURI, String userAgent) {
+		print(jsonDocumentURI.string);
+		RequestClient getrequest = jsonDocumentURI.get();
+		getrequest.setHeader("User-Agent", userAgent);
+		getrequest.setHeader("Accept-Encoding", "deflate"); 		
+		ResponseClient getresponse = getrequest.execute();
+		
+		variable String jsonstring = "";
+		try {
+			jsonstring = getresponse.contents;
+			return jsonstring;
+		} catch (Exception e) {
+			print("downloadFromWebservice error: " + e.string);
+			return "ERROR";
+		}
+	}
+
+	"Tries to parse a String with parse() from ceylon.json to identify whether it is JSON. 
+	 + Return value (success): Boolean 'true'
+	 + Return value (failed): Boolean 'false'"
+	Boolean isValidJSONDocument (String jsonDocument) {
+		variable JsonValue? parsedJson = null;
+		try {
+			// check whether jsonparse can parse the string without exception
+			parsedJson = jsonparse(jsonDocument);			
+			return true;
+		} catch (Exception e) {
+			print("isValidJSONDocument-Error: " + e.string);
+			return false;
+		}
+	}
+	
+	"Retrieves a JSON document from URI jsonDocumentURI. Saves the JSON Document with the ID documentID in the database databaseName.
+	 Using userAgent as userAgent-Header while retrieving from URI (some webservices require this).   
+	    + Return value (success): Boolean 'true'
+	    + Return value (failed): Boolean 'false'"
+	shared Boolean saveDocumentFromWebservice(String databaseName, String documentID, Uri jsonDocumentURI, String userAgent) {
+		print (jsonDocumentURI.string);
+		String jsonDocument	= downloadFromWebservice(jsonDocumentURI, userAgent);
+		print (jsonDocument);
+		if (isValidJSONDocument(jsonDocument)) {
+			return makeRequest(url + databaseName + "/" + documentID, put, [200, 201], jsonDocument);	
+		}
+		else {
+			return false;
+		}
+	}
 	
 	"Saves an revised/updated version of a JSON document jsonDocument identified by the ID documentID in the CouchDB database databaseName.
 	    An update is only possible if the current revision id is known. Thats why this method first requests the document and then uses
