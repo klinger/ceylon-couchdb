@@ -208,13 +208,13 @@ shared class CouchDB(String url) {
 	}
 	
 	"Retrieves a JSON document from URI jsonDocumentURI. Saves the JSON Document with the ID documentID in the database databaseName.
-	 Using userAgent as userAgent-Header while retrieving from URI (some webservices require this).   
+	 Using userAgent as userAgent-Header while retrieving from URI (some webservices require this). 
+	 If the retrieved document is not JSON no request to the database will be done and the method returns false. If the document is
+	 already in the database saving will fail.  
 	    + Return value (success): Boolean 'true'
 	    + Return value (failed): Boolean 'false'"
 	shared Boolean saveDocumentFromWebservice(String databaseName, String documentID, Uri jsonDocumentURI, String userAgent) {
-		print (jsonDocumentURI.string);
-		String jsonDocument	= downloadFromWebservice(jsonDocumentURI, userAgent);
-		print (jsonDocument);
+		String jsonDocument	= downloadFromWebservice(jsonDocumentURI, userAgent);		
 		if (isValidJSONDocument(jsonDocument)) {
 			return makeRequest(url + databaseName + "/" + documentID, put, [200, 201], jsonDocument);	
 		}
